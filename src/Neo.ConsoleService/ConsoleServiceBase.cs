@@ -390,10 +390,12 @@ public abstract class ConsoleServiceBase
 
     public virtual bool OnStart(string[] args)
     {
+        Console.WriteLine("In beginning of OnStart");
         // Register sigterm event handler
         AssemblyLoadContext.Default.Unloading += SigTermEventHandler;
         // Register sigint event handler
         Console.CancelKeyPress += CancelHandler;
+        Console.WriteLine("In end of OnStart");
         return true;
     }
 
@@ -578,6 +580,7 @@ public abstract class ConsoleServiceBase
 
     public void Run(string[] args)
     {
+        Console.WriteLine("Starting service...");
         if (Environment.UserInteractive)
         {
             if (args.Length == 1 && (args[0] == "--install" || args[0] == "/install"))
@@ -590,12 +593,24 @@ public abstract class ConsoleServiceBase
             }
             else
             {
+                Console.WriteLine("Running in console mode");
                 if (OnStart(args))
                 {
-                    if (IsBackground) WaitForShutdown();
-                    else RunConsole();
+                    Console.WriteLine("Before RunConsole/WaitForShutdown");
+                    if (IsBackground)
+                    {
+                        Console.WriteLine("Running in background mode");
+                        WaitForShutdown();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Running Console");
+                        RunConsole();
+                    }
                 }
+                Console.WriteLine("Before OnStop");
                 OnStop();
+                Console.WriteLine("After OnStop");
             }
         }
         else
@@ -740,6 +755,7 @@ public abstract class ConsoleServiceBase
         Console.ForegroundColor = ConsoleColor.DarkGreen;
         Console.SetIn(new StreamReader(Console.OpenStandardInput(), Console.InputEncoding, false, ushort.MaxValue));
 
+        Console.WriteLine($"Before while(_running)");
         while (_running)
         {
             if (ShowPrompt)
